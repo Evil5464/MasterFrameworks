@@ -31,7 +31,7 @@ var controller = {
     } catch (error) {
       //Cuando faltan datos en el post entra al error
       return res.status(200).send({
-        status: 'error',
+        status: "error",
         message: "Faltan datos por enviar !!!",
       });
     }
@@ -46,29 +46,51 @@ var controller = {
       article.image = null;
 
       //Guardar articulo
-      article.save((err, articleStored)=>{
-        if(err || !articleStored){
+      article.save((err, articleStored) => {
+        if (err || !articleStored) {
           return res.status(404).send({
-            status: 'error',
+            status: "error",
             message: "El artículo no se ha guardado!!!",
           });
         }
 
         // Devolver respuesta
         return res.status(200).send({
-          status: 'success',
-          article: articleStored
+          status: "success",
+          article: articleStored,
         });
-
       });
-
     } else {
       //Cuando alguno de los datos del post es vacio
       return res.status(200).send({
-        status: 'error',
+        status: "error",
         message: "Los datos no son válidos !!!",
       });
     }
+  },
+
+  getArticles: (req, res) => {
+    //Find para consultar artículos en orden descendente
+    Article.find({}).sort('-_id').exec((err, articles) => {
+      if(err){
+        return res.status(500).send({
+          status: "error",
+          message: "error al devolver los artículos !!!",
+        });
+      }
+
+      if(!articles){
+        return res.status(404).send({
+          status: "error",
+          message: "no hay artículos para mostrar!!!",
+        });
+      }
+
+      return res.status(200).send({
+        status: "success",
+        articles
+      });
+    });
   },
 };
 
