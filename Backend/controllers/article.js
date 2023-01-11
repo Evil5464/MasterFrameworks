@@ -72,23 +72,21 @@ var controller = {
   getArticles: (req, res) => {
     var query = Article.find({});
 
-
     var last = req.params.last;
-    if(last || last != undefined){
+    if (last || last != undefined) {
       query.limit(5);
     }
 
-    
     //Find para consultar artículos en orden descendente
-    query.sort('-_id').exec((err, articles) => {
-      if(err){
+    query.sort("-_id").exec((err, articles) => {
+      if (err) {
         return res.status(500).send({
           status: "error",
           message: "error al devolver los artículos !!!",
         });
       }
 
-      if(!articles){
+      if (!articles) {
         return res.status(404).send({
           status: "error",
           message: "no hay artículos para mostrar!!!",
@@ -97,8 +95,38 @@ var controller = {
 
       return res.status(200).send({
         status: "success",
-        articles
+        articles,
       });
+    });
+  },
+
+  getArticle: (req, res) => {
+    //Recoger el id de la url
+    var articleId = req.params.id;
+
+    //Comprobar si existe
+    if(!articleId || articleId == null){
+      return res.status(404).send({
+        status: "error",
+        message: 'no existe el artículo !!!'
+      });
+    }
+
+    //Buscar el artículo
+    Article.findById(articleId, (err, article)=>{
+     
+      if(err || !article){
+        return res.status(500).send({
+          status: "error",
+          message: 'No existe el artículo !!!'
+        });
+      }
+      //Devolver el artículo
+      return res.status(200).send({
+        status: "success",
+        article,
+      });
+
     });
   },
 };
