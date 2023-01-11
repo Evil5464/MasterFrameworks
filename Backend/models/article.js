@@ -1,7 +1,7 @@
 'use strict'
 
-var mongosse = require('mongoose');
-var Schema = mongooseSchema;
+var mongoose = require('mongoose');
+var Schema = mongoose.Schema;
 var ArticleSchema = Schema({
     title: String,
     content: String,
@@ -9,4 +9,4 @@ var ArticleSchema = Schema({
     image: String
 });
 
-module.exports = mongosse.model('Article', ArticleSchema);
+module.exports = mongoose.model('Article', ArticleSchema);
