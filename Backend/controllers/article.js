@@ -70,8 +70,17 @@ var controller = {
   },
 
   getArticles: (req, res) => {
+    var query = Article.find({});
+
+
+    var last = req.params.last;
+    if(last || last != undefined){
+      query.limit(5);
+    }
+
+    
     //Find para consultar artículos en orden descendente
-    Article.find({}).sort('-_id').exec((err, articles) => {
+    query.sort('-_id').exec((err, articles) => {
       if(err){
         return res.status(500).send({
           status: "error",
