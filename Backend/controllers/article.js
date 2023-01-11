@@ -24,31 +24,48 @@ var controller = {
     //Recoger parametros por post
     var params = req.body;
 
-    //Validar datos
+    //Validar datos(validator)
     try {
       var validate_title = !validator.isEmpty(params.title);
       var validate_content = !validator.isEmpty(params.content);
     } catch (error) {
       //Cuando faltan datos en el post entra al error
       return res.status(200).send({
+        status: 'error',
         message: "Faltan datos por enviar !!!",
       });
     }
 
     if (validate_title && validate_content) {
       //Crear el objeto a aguardar
+      var article = new Article();
 
       //Asignar valores
+      article.title = params.title;
+      article.content = params.content;
+      article.image = null;
 
       //Guardar articulo
+      article.save((err, articleStored)=>{
+        if(err || !articleStored){
+          return res.status(404).send({
+            status: 'error',
+            message: "El artículo no se ha guardado!!!",
+          });
+        }
 
-      // Devolver respuesta
-      return res.status(200).send({
-        article: params,
+        // Devolver respuesta
+        return res.status(200).send({
+          status: 'success',
+          article: articleStored
+        });
+
       });
+
     } else {
       //Cuando alguno de los datos del post es vacio
       return res.status(200).send({
+        status: 'error',
         message: "Los datos no son válidos !!!",
       });
     }
