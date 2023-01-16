@@ -105,20 +105,19 @@ var controller = {
     var articleId = req.params.id;
 
     //Comprobar si existe
-    if(!articleId || articleId == null){
+    if (!articleId || articleId == null) {
       return res.status(404).send({
         status: "error",
-        message: 'no existe el artículo !!!'
+        message: "no existe el artículo !!!",
       });
     }
 
     //Buscar el artículo
-    Article.findById(articleId, (err, article)=>{
-     
-      if(err || !article){
+    Article.findById(articleId, (err, article) => {
+      if (err || !article) {
         return res.status(500).send({
           status: "error",
-          message: 'No existe el artículo !!!'
+          message: "No existe el artículo !!!",
         });
       }
       //Devolver el artículo
@@ -126,7 +125,81 @@ var controller = {
         status: "success",
         article,
       });
+    });
+  },
 
+  update: (req, res) => {
+    //Recoger id del artículo
+    var article_id = req.params.id;
+
+    //Recoger los datos recibidos por PUT
+    var params = req.body;
+
+    //Validar los datos
+    try {
+      var validate_title = !validator.isEmpty(params.title);
+      var validate_content = !validator.isEmpty(params.content);
+    } catch (err) {
+      return res.status(200).send({
+        status: "error",
+        message: "Faltan datos por enviar !!!",
+      });
+    }
+    if (validate_content && validate_title) {
+      //Hacer consulta y update
+      Article.findOneAndUpdate(
+        { _id: article_id },
+        params,
+        { new: true },
+        (err, articleUpdated) => {
+          if (err) {
+            return res.status(500).send({
+              status: "error",
+              message: "Error al actualizar !!!",
+            });
+          }
+          if (!articleUpdated) {
+            return res.status(404).send({
+              status: "error",
+              message: "No existe el artículo !!!",
+            });
+          }
+          return res.status(200).send({
+            status: "success",
+            article: articleUpdated,
+          });
+        }
+      );
+    } else {
+      return res.status(200).send({
+        status: "error",
+        message: "La validación no es correcta !!!",
+      });
+    }
+  },
+
+  delete: (req, res) => {
+    //Recoger el id de la url
+    var articleId = req.params.id;
+
+    //buscar y borrar
+    Article.findOneAndDelete({ _id: articleId }, (err, articleRemoved) => {
+      if (err) {
+        return res.status(500).send({
+          status: "error",
+          message: " error al borrar!!!",
+        });
+      }
+      if (!articleRemoved) {
+        return res.status(404).send({
+          status: "error",
+          message: "No se ha borrado el articulo, posiblemente no existe !!!",
+        });
+      }
+      return res.status(200).send({
+        status: "success",
+        article: articleRemoved,
+      });
     });
   },
 };
