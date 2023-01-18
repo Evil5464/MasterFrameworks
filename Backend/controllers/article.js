@@ -2,6 +2,9 @@
 
 var validator = require("validator");
 var Article = require("../models/article");
+var fs = require('fs'); //file system permite eliminar archivos
+var path = require('path');//obtener path en el sistema del servidor
+const { exists } = require("../models/article");
 
 var controller = {
   datosCurso: (req, res) => {
@@ -202,6 +205,85 @@ var controller = {
       });
     });
   },
+
+  upload: (req, res)=>{
+    //Configurar el módulo connect multiparty router/article
+
+    //Recoger el fichero
+    var file_name = 'Imagen no subida';
+    
+    if(!req.files){
+      return res.status(404).send({
+        status: 'error',
+        message: file_name
+      });
+    }
+    //Conseguir el nombre y la extenciíon del archivo
+    var file_path = req.files.file0.path;
+    var file_split = file_path.split('\\');
+
+    //Nombre del archivo 
+    var file_name = file_split[2];
+    //Extensión del archivo
+    var extension_split = file_name.split('\.');
+    var file_ext = extension_split[1];
+    
+    //Comprobar la extensión, solo imégenes, si no es valida se borra el fichero
+   
+
+    if(file_ext != 'png' && file_ext != 'jpg' && file_ext != 'jpeg' && file_ext != 'gif' ){
+      //Borrar el archivo subido
+      fs.unlink(file_path, (err)=>{
+        return res.status(200).send({
+          status: 'error',
+          message: 'La extención de la imagen no es válida XD'
+        });
+      });
+    }else{
+      //Sí todo es válido
+      var articleId = req.params.id;
+
+      //Buscar el artículo, asignarle en nombre de la imágen y actualizarlo
+
+      Article.findOneAndUpdate({_id: articleId}, {image: file_name}, {new:true}, (err, articleUpdated)=>{ 
+        if(err || !articleUpdated){
+          return res.status(404).send({
+            status: 'error',
+            message: 'Error al guardar la imágen del artículo'
+          });
+        }
+
+        return res.status(200).send({
+          status: 'success',
+          article: articleUpdated
+        });
+
+      });
+     
+    }   
+  },
+  
+  getImage: (req, res)=>{
+    var file = req.params.image;
+    var path_file = './upload/articles/'+file;
+    
+    fs.exists(path_file, (exists)=>{
+      console.log(exists);
+      if(exists){
+        return res.sendFile(path.resolve(path_file));
+
+      }else{
+        return res.status(404).send({
+          status: 'error',
+          message: 'La imagen no existe'
+        });
+
+      }
+    });
+
+  }
+
+
 };
 
 module.exports = controller;
