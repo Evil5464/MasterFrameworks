@@ -281,6 +281,48 @@ var controller = {
       }
     });
 
+  },
+
+  search: (req, res)=>{
+    //Sacar el string a buscar
+    var searchString = req.params.search;
+
+    //Construccion de find para obtener todas las incidencias en el buscador
+    Article.find({"$or":[
+      {"title": { "$regex": searchString, "$options": "i"}},
+      {"content": { "$regex": searchString, "$options": "i"}}
+    ]})
+    .sort([['date', 'ascending']])
+    .exec((err, articles)=>{
+  
+
+      if(err){
+        return res.status(500).send({
+          status: 'error',
+          mesaje: 'Error en la petición !!!'
+        });
+      }
+
+      if(!articles || articles.length >=0){
+        return res.status(404).send({
+          status: 'error',
+          mesaje: 'No existen artículos que coincidan con tu busqueda !!!'
+        });
+      }
+
+      return res.status(200).send({
+        status: 'success',
+        searchString,
+        articles,
+        
+      });
+
+
+    })
+
+
+    
+    
   }
 
 
